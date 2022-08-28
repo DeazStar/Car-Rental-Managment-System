@@ -18,6 +18,7 @@ void signup_user();
 void login_user(bool &access);
 void addcar();
 void showcar();
+void deletecar();
 
 int idx = 0;
 string usrfirstname, usrlastname, usremail;
@@ -77,6 +78,10 @@ int main()
                     break;
                 case 2:
                     showcar();
+                    goto adminmenu;
+                    break;
+                case 3:
+                    deletecar();
                     goto adminmenu;
                     break;
                     
@@ -307,7 +312,9 @@ void addcar()
     int no, length;
 
     int additional, position;
-
+    cout << "\t\t------------------------------------"<< endl;
+    cout << setw(32) << "Add Cars" << endl;
+    cout << "\t\t------------------------------------"<< endl;
     cout << "\n\t\tEnter RegNo: ";
     cin >> no;
 
@@ -395,15 +402,20 @@ void showcar()
     char user_input[20];
     Car car_view;
     fstream view_cars;
+    cout << "\t\t------------------------------------"<< endl;
+    cout << setw(32) << "View Cars" << endl;
+    cout << "\t\t------------------------------------"<< endl;
+
     view_cars.open("cars.dat", ios::binary|ios::in);
 
  if(!view_cars.is_open())
     {
-        cout << "\t\tUnable to access the file at the moment...!";
+        cout << "\n\t\tUnable to access the file at the moment...!";
         exit(1);
     }
     else
     { 
+        cout << "\n";
         cout <<"\t\t----------------------------------------------------------------------------------" << endl;
         cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |" << endl;
         cout <<"\t\t----------------------------------------------------------------------------------" << endl;
@@ -418,6 +430,45 @@ void showcar()
 
     view_cars.close();
 
-    cout << "Press any key to continue... ";
+    cout << "\n\t\tPress any key to continue... ";
     cin >> user_input;
+}
+
+void deletecar()
+{
+    int no, decrement, position;
+    char user_input[20];
+    fstream car_delete;
+    Car car_info;
+
+    cout << "\t\t------------------------------------"<< endl;
+    cout << setw(32) << "Delete Cars" << endl;
+    cout << "\t\t------------------------------------"<< endl;
+    cout << "\n\t\tEnter RegNo: ";
+    cin >> no;
+
+    car_delete.open("cars.dat", ios::binary|ios::in|ios::out);
+
+    if(car_delete.is_open() == false)
+    {
+        cout << "\t\tUnable to access the file at the moment... "<<endl;
+        cin >> user_input;
+    }
+    else
+    {
+        while(car_delete.read(reinterpret_cast<char *>(&car_info), sizeof(Car)))
+        {
+            if(no == car_info.reg_no)
+            {
+                cout << "\n\t\tEnter Quantity: ";
+                cin >> decrement;
+                car_info.quantity -= decrement;
+                position = -1 * static_cast<int>(sizeof(car_info));
+                car_delete.seekg(position, ios::cur);
+                car_delete.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+            }
+        }
+    }
+
+
 }
