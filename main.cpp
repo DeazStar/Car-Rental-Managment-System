@@ -7,12 +7,17 @@
 
 using namespace std;
 
+struct Car
+{
+    char manufacture[40];
+    char model[40];
+    int price, quantity, reg_no;
+};
 
-//void login_user();
 void signup_user();
 void login_user(bool &access);
 void addcar();
-void viewcar();
+void showcar();
 
 int idx = 0;
 string usrfirstname, usrlastname, usremail;
@@ -71,7 +76,7 @@ int main()
                     goto adminmenu;
                     break;
                 case 2:
-                    viewcar();
+                    showcar();
                     goto adminmenu;
                     break;
                     
@@ -293,87 +298,106 @@ void login_user(bool &access)
 
 void addcar()
 {
-    fstream cars_info;
-    string manufacture, regno, model;
-    int price, caridx,quantity,quan,file_pointer;
-    char user_input;
-    bool flag = true;
-    string line;
+    char user_input[20];
 
-    cout << "\t\t------------------------------------"<< endl;
-    cout << setw(32) << "Add Cars" << endl;
-    cout << "\t\t------------------------------------"<< endl;
-    cout <<"\n";
-    cout << "\t\tEnter RegNO: ";
-    cin.ignore();
-    getline(cin, regno);
-    cout <<"\n\t\tEnter Car Manufacturer: ";
-    getline(cin, manufacture);
-    cout << "\n\t\tEnter Car Model: ";
-    getline(cin, model);
-    cout <<"\n\t\tEnter Quantity: ";
-    cin >> quantity;
-    cout << "\n\t\tEnter Price per day: ";
-    cin >> price;
+    Car car_info;
 
-    cars_info.open("cars.txt", ios::in);
+    fstream carfile;
 
-    if(!cars_info.is_open())
+    int no, length;
+
+    int additional, position;
+
+    cout << "\n\t\tEnter RegNo: ";
+    cin >> no;
+
+    carfile.open("cars.dat", ios::binary|ios::in|ios::out);
+
+    carfile.seekg(0, ios::end);
+    length = carfile.tellg();
+
+    if(length == 0)
     {
-        cout << "\t file could not be opened at the momement" << endl;
-        cout << "\n\t\tPress any key to continue... ";
-        cin >> user_input;
-        exit(1);
+        carfile.close();
+        goto addinfo;
     }
     else
     {
-        // fix this
-        while(getline(cars_info, line))
+        carfile.seekg(0, ios::beg);
+    }
+
+    if(carfile.is_open() == false)
+    {
+        cout << "Unable to access the file!... ";
+        
+    }
+    else
+    {
+        while(carfile.read(reinterpret_cast<char *>(&car_info), sizeof(Car)))
         {
-            if(line == manufacture)
+            if (no == car_info.reg_no)
             {
-                if(line == model)
+                cout << "\t\tCar aleady exit... " << endl;
+                cout <<"\t\tDo you want to increase the qunatity(y/n).... ";
+                cin >> user_input;
+                char yes[2] = "y";
+                if(strcasecmp(user_input, yes) == 0)
                 {
-                    flag = false;
-                    cars_info >> quan;
-                    file_pointer = cars_info.tellg();
-                    cars_info.seekg(file_pointer, ios::beg);
-                    quantity += quan;
+                    cout << "\n\t\tEnter Quantity: ";
+                    cin >> additional;
+                    car_info.quantity +=  additional;
+                    position = (-1) * static_cast<int> (sizeof(car_info));
+                    carfile.seekp(position, ios::cur);
+                    carfile.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                }
+                else
+                {
+                    exit(1);
                 }
             }
-        }
-        // end of fix
-    }
-
-    cars_info.close();
-
-    if(flag == true)
-    {
-        cars_info.open("cars.txt", ios::app);
-        {
-            if(cars_info.is_open())
+            else
             {
-                cars_info << regno << " " << manufacture << " " << model << " "<< quantity << " " << price << endl;
+                goto addinfo;
             }
         }
     }
 
-    cars_info.close();
+    carfile.close();
+
+    goto end;
+
+    addinfo:
+    carfile.open("cars.dat", ios::binary|ios::app);
     
-    
+    car_info.reg_no = no;
+    cin.ignore();
+    cout << "\n\t\tEnter Manufacturer: ";
+    cin.getline(car_info.manufacture, 40);
+    cout << "\n\t\tEnter Mode: ";
+    cin.getline(car_info.model, 40);
+    cout << "\n\t\tEnter Quantity: ";
+    cin >> car_info.quantity;
+    cout << "\n\t\tEnter Price: ";
+    cin >> car_info.price;
+
+    carfile.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+
+    carfile.close();
+
+    end:
+    cout << "\n" << endl;
+
 
 }
 
-void viewcar()
+void showcar()
 {
-    char user_input;
+    char user_input[20];
+    Car car_view;
     fstream view_cars;
-    int regno, price, quantity;
-    string manufacture, model;
+    view_cars.open("cars.dat", ios::binary|ios::in);
 
-    view_cars.open("cars.txt", ios::in);
-
-    if(!view_cars.is_open())
+ if(!view_cars.is_open())
     {
         cout << "\t\tUnable to access the file at the moment...!";
         exit(1);
@@ -383,11 +407,9 @@ void viewcar()
         cout <<"\t\t----------------------------------------------------------------------------------" << endl;
         cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |" << endl;
         cout <<"\t\t----------------------------------------------------------------------------------" << endl;
-        while(view_cars.eof() == false)
-        {
-            view_cars >> regno >> manufacture >> model >> quantity >> price;
-           
-            cout << "\t\t      " << regno << setw(15) << manufacture << setw(25) << model << setw(15) << quantity << setw(15) << price << endl;
+        while(view_cars.read(reinterpret_cast<char *>(&car_view), sizeof(Car)))
+        {  
+            cout << "\t\t      " <<car_view.reg_no << setw(15) << car_view.manufacture << setw(25) << car_view.model << setw(15) << car_view.quantity << setw(15) << car_view.price << endl;
 
         }
         cout <<"\t\t----------------------------------------------------------------------------------" << endl;
