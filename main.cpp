@@ -19,6 +19,7 @@ void login_user(bool &access);
 void addcar();
 void showcar();
 void deletecar();
+void deleteblock(int num);
 
 int idx = 0;
 string usrfirstname, usrlastname, usremail;
@@ -463,12 +464,53 @@ void deletecar()
                 cout << "\n\t\tEnter Quantity: ";
                 cin >> decrement;
                 car_info.quantity -= decrement;
-                position = -1 * static_cast<int>(sizeof(car_info));
-                car_delete.seekg(position, ios::cur);
-                car_delete.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                if(car_info.quantity == 0)
+                {
+                    deleteblock(car_info.reg_no);
+                }
+                else
+                {
+                    position = -1 * static_cast<int>(sizeof(car_info));
+                    car_delete.seekg(position, ios::cur);
+                    car_delete.write(reinterpret_cast<char *>(&car_info), sizeof(Car));  
+                }
+
             }
         }
     }
 
 
+}
+
+void deleteblock(int num)
+{
+    fstream transfer, temp;
+    Car car_info;
+
+    transfer.open("cars.dat", ios::binary|ios::in);
+    temp.open("temp.dat", ios::binary|ios::app);
+
+    if(transfer.is_open() == false && temp.is_open() == false)
+    {
+        cout << "\n\t\tError Deleting a file.... " << endl;
+        exit(1);
+    }
+    else
+    {
+        while(transfer.read(reinterpret_cast<char *>(&car_info), sizeof(Car)))
+        {
+            if(car_info.reg_no == num)
+            {
+                continue;
+            }
+            else
+            {
+              temp.write(reinterpret_cast<char *>(&car_info), sizeof(Car));  
+            }
+        }
+    }
+    transfer.close();
+    remove("cars.dat");
+    temp.close();
+    rename("temp.dat", "cars.dat");
 }
