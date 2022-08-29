@@ -20,6 +20,7 @@ void addcar();
 void showcar();
 void deletecar();
 void deleteblock(int num);
+void updatecar();
 
 int idx = 0;
 string usrfirstname, usrlastname, usremail;
@@ -31,7 +32,10 @@ int main()
     bool access = false;
 
     int age, user_input;
-     cout << "\n\n" ;
+
+    char input;
+
+    cout << "\n\n" ;
     cout << "\t\t Welcome to DeadStar Car Rental" << endl;
     cout << "\t\t************************************"<< endl;
     cout << setw(30) << "         1. Admin Login " << endl;
@@ -85,6 +89,27 @@ int main()
                     deletecar();
                     goto adminmenu;
                     break;
+                case 4:
+                    updatecar();
+                    goto adminmenu;
+                    break;
+                case 5:
+                    askagain:
+                    cout << "\n\t\tAre you sure you want to exit the program(y/n)... ";
+                    cin >> input;
+                    if(input == 'Y' || input == 'y' )
+                    {
+                        exit(1);
+                    }
+                    else if (input == 'N' || input == 'n')
+                    {
+                        goto adminmenu;
+                    }
+                    else
+                    {
+                        cout << "\n\t\tEnter the correct input... " << endl;
+                        goto askagain;
+                    }
                     
             }
 
@@ -513,4 +538,110 @@ void deleteblock(int num)
     remove("cars.dat");
     temp.close();
     rename("temp.dat", "cars.dat");
+}
+
+void updatecar()
+{
+    int no;
+    
+    Car car_info;
+
+    char user_input[20];
+
+    int input;
+
+    int position;
+
+    fstream car_update;
+
+    cout << "\t\t------------------------------------"<< endl;
+    cout << setw(32) << "Update Cars" << endl;
+    cout << "\t\t------------------------------------"<< endl;
+    cout << "\n\t\tEnter RegNo: ";
+    cin >> no;
+
+    car_update.open("cars.dat", ios::binary|ios::in|ios::out);
+
+    if(car_update.is_open() == false)
+    {
+        cout << "\n\t\tUnable to access the file at the moment... ";
+        cin >> user_input;
+    }
+    else
+    {
+        while(car_update.read(reinterpret_cast<char *> (&car_info), sizeof(Car)))
+        {
+            if(no == car_info.reg_no)
+            {
+                cout <<"\n\t\tWhat do you want to edit:- " << endl;
+                cout << "\n\t\t  1. RegNo"<<endl;
+                cout << "\t\t  2. Manufacturer Name " << endl;
+                cout << "\t\t  3. Model" << endl;
+                cout << "\t\t  4. Quantity " << endl;
+                cout << "\t\t  5. Price " << endl;
+                cout << "\t\t  6. all " << endl;
+
+                cout << "\n\t\t Enter your choice:-> " << endl;
+                cin >> input;
+
+                switch(input)
+                {
+                    case 1:
+                        cout << "\n\t\t Enter the new RegNo: ";
+                        cin >> car_info.reg_no;
+                        position = (-1) * static_cast<int> (sizeof(car_info));
+                        car_update.seekp(position, ios::cur);
+                        car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                        break;
+                    case 2:
+                        cout << "\n\t\t Enter the the new Manufacturer Name: ";
+                        cin >> car_info.manufacture;
+                        position = (-1) * static_cast<int> (sizeof(car_info));
+                        car_update.seekp(position, ios::cur);
+                        car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                        break;
+                    case 3:
+                        cout << "\n\t\t Enter the new Model: ";
+                        cin >> car_info.model;
+                        position = (-1)*static_cast<int> (sizeof(car_info));
+                        car_update.seekp(position, ios::cur);
+                        car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                        break;
+                    case 4:
+                        cout << "\n\t\t Enter the new Quantity: ";
+                        cin>> car_info.quantity;
+                        position = (-1)*static_cast<int> (sizeof(car_info));
+                        car_update.seekp(position, ios::cur);
+                        car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                        break;
+                    case 5:
+                        cout << "\n\t\t Enter the new Price: ";
+                        cin >> car_info.price;
+                        position = (-1)*static_cast<int> (sizeof(car_info));
+                        car_update.seekp(position, ios::cur);
+                        car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                        break;
+                    case 6:
+                        cout << "\n\t\t Enter the new RegNo: ";
+                        cin >> car_info.reg_no; 
+                        cout << "\n\t\t Enter the the new Manufacturer Name: ";
+                        cin >> car_info.manufacture;                      
+                        cout << "\n\t\t Enter the new Model: ";
+                        cin >> car_info.model;
+                        cout << "\n\t\t Enter the new Quantity: ";
+                        cin>> car_info.quantity;
+                        cout << "\n\t\t Enter the new Price: ";
+                        cin >> car_info.price;
+                        position = (-1)*static_cast<int> (sizeof(car_info));
+                        car_update.seekp(position, ios::cur);
+                        car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                    default:
+                        cout << "\n\t\t Enter the correct input... ";
+                        exit(1); // to be edited;
+
+
+                }
+            }
+        }
+    }
 }
