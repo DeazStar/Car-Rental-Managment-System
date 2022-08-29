@@ -110,7 +110,7 @@ int main()
                         cout << "\n\t\tEnter the correct input... " << endl;
                         goto askagain;
                     }
-                    
+
             }
 
         }
@@ -174,7 +174,7 @@ void signup_user()
     fstream signups;
 
     string first_name, last_name, username, email, password;
-    
+
     int age;
 
     string usr;
@@ -236,7 +236,7 @@ void signup_user()
                 idx++;
             }
         }
-        
+
     }
 
     idx++;
@@ -254,7 +254,7 @@ void signup_user()
     {
         signups << username << " " << first_name << " "<< last_name << " "<< email << " " << password << " " << idx << "\n";
     }
-  
+
     signups.close();
 
 
@@ -274,7 +274,7 @@ void login_user(bool &access)
     cout << setw(32) << "Login" << endl;
     cout << "\t\t************************************"<< endl;
     cout << "\n";
-    retry: 
+    retry:
     cout << "\t\tEnter your Username: ";
     cin >> username;
     cout << "\n";
@@ -293,7 +293,7 @@ void login_user(bool &access)
         {
             logs >> usrname;
             if(usrname == username)
-            {   
+            {
                 logs >> usrfirstname;
                 logs >> usrlastname;
                 logs >> usremail;
@@ -349,20 +349,21 @@ void addcar()
     carfile.seekg(0, ios::end);
     length = carfile.tellg();
 
-    if(length == 0)
+    if(length == -1)
     {
         carfile.close();
         goto addinfo;
     }
     else
     {
-        carfile.seekg(0, ios::beg);
+        carfile.seekg(ios::beg);
+        length = carfile.tellg();
     }
 
     if(carfile.is_open() == false)
     {
         cout << "Unable to access the file!... ";
-        
+
     }
     else
     {
@@ -390,18 +391,17 @@ void addcar()
             }
             else
             {
+                carfile.close();
                 goto addinfo;
             }
         }
     }
 
-    carfile.close();
-
     goto end;
 
     addinfo:
     carfile.open("cars.dat", ios::binary|ios::app);
-    
+
     car_info.reg_no = no;
     cin.ignore();
     cout << "\n\t\tEnter Manufacturer: ";
@@ -440,13 +440,13 @@ void showcar()
         exit(1);
     }
     else
-    { 
+    {
         cout << "\n";
         cout <<"\t\t----------------------------------------------------------------------------------" << endl;
         cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |" << endl;
         cout <<"\t\t----------------------------------------------------------------------------------" << endl;
         while(view_cars.read(reinterpret_cast<char *>(&car_view), sizeof(Car)))
-        {  
+        {
             cout << "\t\t      " <<car_view.reg_no << setw(15) << car_view.manufacture << setw(25) << car_view.model << setw(15) << car_view.quantity << setw(15) << car_view.price << endl;
 
         }
@@ -497,7 +497,7 @@ void deletecar()
                 {
                     position = -1 * static_cast<int>(sizeof(car_info));
                     car_delete.seekg(position, ios::cur);
-                    car_delete.write(reinterpret_cast<char *>(&car_info), sizeof(Car));  
+                    car_delete.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
                 }
 
             }
@@ -530,7 +530,7 @@ void deleteblock(int num)
             }
             else
             {
-              temp.write(reinterpret_cast<char *>(&car_info), sizeof(Car));  
+              temp.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
             }
         }
     }
@@ -543,7 +543,7 @@ void deleteblock(int num)
 void updatecar()
 {
     int no;
-    
+
     Car car_info;
 
     char user_input[20];
@@ -623,9 +623,9 @@ void updatecar()
                         break;
                     case 6:
                         cout << "\n\t\t Enter the new RegNo: ";
-                        cin >> car_info.reg_no; 
+                        cin >> car_info.reg_no;
                         cout << "\n\t\t Enter the the new Manufacturer Name: ";
-                        cin >> car_info.manufacture;                      
+                        cin >> car_info.manufacture;
                         cout << "\n\t\t Enter the new Model: ";
                         cin >> car_info.model;
                         cout << "\n\t\t Enter the new Quantity: ";
