@@ -14,6 +14,23 @@ struct Car
     int price, quantity, reg_no;
 };
 
+struct Customer
+{
+    char user_name[50];
+    char first_name[50];
+    char last_name[50];
+    char email[50];
+    char password[50];
+};
+
+struct temp
+{
+    char usremail[50];
+    char usrpassword[50];
+    char usrname[50];
+};
+
+int convert(char *);
 void signup_user();
 void login_user(bool &access);
 void addcar();
@@ -167,142 +184,186 @@ int main()
 
 }
 
+
+int convert(char *str)
+{
+    int sum = 0;
+    for (int i = 0; i < strlen(str); i++)
+    {
+        
+        sum += int(str[i]);
+    }
+
+    return sum;
+}
+
 void signup_user()
 {
-    int user_input;
+    Customer user_info;
+
+    temp tmp;
 
     fstream signups;
 
-    string first_name, last_name, username, email, password;
+    int length;
 
-    int age;
-
-    string usr;
-
+    int input;
+    signups.open("logsfile.dat", ios::binary|ios::in|ios::out);
+    
     cout <<'\n';
     cout << "\t\t************************************"<< endl;
     cout << setw(32) << "Sign Up" << endl;
     cout << "\t\t************************************"<< endl;
+    cout << "\n"; 
     cout << "\n";
     cout << "\t\tEnter your first name: ";
-    cin >> first_name;
+    cin >> user_info.first_name;
     cout << "\n";
     cout << "\t\tEnter your last name: ";
-    cin >> last_name;
+    cin >> user_info.last_name;
     cout << "\n";
+    retry: 
     cout << "\t\tEnter your Email: ";
-    cin >> email;
+    cin >>tmp.usremail;
     cout << "\n";
-    retry:
+    usrretry:
     cout << "\t\tEnter user name: ";
-    cin >> username;
+    cin >>  tmp.usrname;
     cout << "\n";
     cout <<"\t\tEnter password: ";
-    cin >> password;
+    cin >> user_info.password;
 
-    signups.open("logsfile.txt", ios::in);
+    
 
+    signups.seekg(0, ios::end);
+    length = signups.tellg();
+    cout << length << endl;;
+
+    if(length == -1 || length == 0)
+    {
+        signups.close();
+        goto finish;
+    }
+    else
+    {
+        signups.seekg(ios::beg);
+    }
     if(signups.is_open() == false)
     {
         cout << "\t\t Unable to access the file at the moment please try again later! " << endl;
-
     }
     else
     {
-        while(getline(signups, usr))
+        while(signups.read(reinterpret_cast<char *>(&user_info), sizeof(Customer)))
         {
-            if(username == usr)
+           /* cout << convert(user_info.email) << endl;
+            cout << convert(tmp.usremail) << endl;
+
+            cout << convert(user_info.user_name) << endl;
+            cout << convert(tmp.usrname) << endl;*/
+            if(convert(user_info.email) == convert(tmp.usremail))
             {
                 cout << "\n";
-                cout << "\t\tThis username is already taken!" << endl;
+                cout << "\t\tThis email is already registered\n"<<endl;
+                cout << "\t\tPress 1 to try again. press any other key to go back... ";
+                cin >> input;
                 cout << "\n";
-                cout << "\t\ttry anoter username" << endl;
-                cout << "\n";
-                cout << "\t\tpress 1 to try again. press anyother key to exit... ";
-                cin >> user_input;
 
-                if(user_input == 1)
+                if(input == 1)
                 {
                     goto retry;
-                    cout << "\n";
                 }
                 else
                 {
+                    goto exit;
+                }
+            }
+            else if(convert(user_info.user_name)== convert(tmp.usrname))
+            {
+                cout << "\n";
+                cout << "\t\tThis username is already taken!\n"<<endl;
+                cout << "\t\tPress 1 to try again. press any other key to go back... ";
+                cin >> input;
 
+                if(input == 1)
+                {
+                    goto usrretry;
+                }
+                else
+                {
+                    goto exit;
                 }
             }
             else
-            {
-                idx++;
+            {   signups.close();
+                goto finish;
             }
         }
-
     }
 
-    idx++;
+    
 
-    signups.close();
+    finish:
 
-    signups.open("logsfile.txt", ios::app);
-
-    if(!signups.is_open())
+    signups.open("logsfile.dat", ios::binary|ios::app);
+    for(int i = 0; i < strlen(tmp.usrname); i++)
     {
-        cout << "\t\t Unable to access the file at the moment please try again later! " << endl;
-
+        user_info.user_name[i] = tmp.usrname[i];
     }
-    else
+    for(int i = 0; i < strlen(tmp.usremail); i++)
     {
-        signups << username << " " << first_name << " "<< last_name << " "<< email << " " << password << " " << idx << "\n";
+        user_info.email[i] = tmp.usremail[i];
     }
-
-    signups.close();
-
+    signups.write(reinterpret_cast<char *>(&user_info), sizeof(Customer));
+    exit:
+    signups.close();  
 
 }
 
+
 void login_user(bool &access)
 {
-    string username, password,usr, usrname ,usrpassword;
-
-    int user_input;
-
-    int k = 0;
-
     fstream logs;
+
+    int input;
+
+    int length;
+
+    temp tmp;
+
+    Customer user_info;
+    
+    logs.open("logsfile.dat", ios::binary|ios::in);
 
     cout << "\t\t************************************"<< endl;
     cout << setw(32) << "Login" << endl;
     cout << "\t\t************************************"<< endl;
     cout << "\n";
     retry:
-    cout << "\t\tEnter your Username: ";
-    cin >> username;
-    cout << "\n";
-    cout << "\t\tEnter Password: ";
-    cin >> password;
+    if(logs.tellp() == -1)
+    {
+        logs.close();
+        logs.open("logsfile.dat", ios::binary|ios::in);
+    }
+    cout << "\t\tEnter username: ";
+    cin >> tmp.usrname;
+    cout << "\n\t\tEnter Password: ";
+    cin >> tmp.usrpassword;
 
-    logs.open("logsfile.txt", ios::in);
-
-    if(!logs.is_open())
+    if(logs.is_open() == false)
     {
         cout << "\t\t Unable to access the file at the moment please try again later! " << endl;
     }
     else
     {
-        while(logs.eof() == false)
+        while(logs.read(reinterpret_cast<char *>(&user_info), sizeof(Customer)))
         {
-            logs >> usrname;
-            if(usrname == username)
+            if(convert(tmp.usrname) == convert(user_info.user_name))
             {
-                logs >> usrfirstname;
-                logs >> usrlastname;
-                logs >> usremail;
-                logs >> usrpassword;
-                logs >> idx;
-
-                if(password == usrpassword)
+                if(convert(tmp.usrpassword) == convert(user_info.password))
                 {
                     access = true;
+                    logs.close();
                 }
             }
         }
@@ -314,17 +375,22 @@ void login_user(bool &access)
         cout << "\t\tpassword or username incorrect" << endl;
         cout << '\n';
         cout << "\t\tPress 1 to try again, Press any key to exit... ";
-        cin >> user_input;
+        cin >> input;
         cout << '\n';
 
-        if(user_input == 1)
+        if(input == 1)
         {
             goto retry;
+        } 
+        else
+        {
+            goto exit;
         }
     }
 
+    exit:
     logs.close();
-
+    
 }
 
 void addcar()
@@ -349,7 +415,7 @@ void addcar()
     carfile.seekg(0, ios::end);
     length = carfile.tellg();
 
-    if(length == -1)
+    if(length == -1 || length == 0)
     {
         carfile.close();
         goto addinfo;
