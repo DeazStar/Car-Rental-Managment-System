@@ -4,8 +4,11 @@
 #include <string.h>
 #include <iomanip>
 #include <stdbool.h>
+#include <ctime>
 
 using namespace std;
+
+char nowuser[50];
 
 struct Car
 {
@@ -30,6 +33,12 @@ struct temp
     char usrname[50];
 };
 
+struct tmpcar
+{
+    char tmpmanufacture[40];
+    char tmpmodel[40];
+};
+
 int convert(char *);
 void signup_user();
 void login_user(bool &access);
@@ -38,6 +47,10 @@ void showcar();
 void deletecar();
 void deleteblock(int num);
 void updatecar();
+void current_time();
+void rentcar();
+void searchcar();
+void rent();
 
 int idx = 0;
 string usrfirstname, usrlastname, usremail;
@@ -166,7 +179,24 @@ int main()
 
            if(access == true)
            {
-                cout << "Access Granted " << endl;
+                cout << "\t\t************************************"<< endl;
+                cout << setw(40) << "Welcom to DeadStar Car Rental" << endl;
+                cout << "\t\t************************************"<< endl;
+                cout <<"\t\t-------------------------------------"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"1. Rent Cars               |"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"2. View Cars               |"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"3. Delete Cars             |"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"4. Update Cars             |"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"5. Exit                    |"<<endl;
+                cout <<"\t\t-------------------------------------"<<endl;
+                cout << "\n\t\tEnter your choice -> ";  
+                cin >> user_input;
+
+                switch(user_input)
+                {
+                    case 1:
+                        rentcar();
+                }
            }
            else
            {
@@ -237,7 +267,6 @@ void signup_user()
 
     signups.seekg(0, ios::end);
     length = signups.tellg();
-    cout << length << endl;;
 
     if(length == -1 || length == 0)
     {
@@ -256,11 +285,6 @@ void signup_user()
     {
         while(signups.read(reinterpret_cast<char *>(&user_info), sizeof(Customer)))
         {
-           /* cout << convert(user_info.email) << endl;
-            cout << convert(tmp.usremail) << endl;
-
-            cout << convert(user_info.user_name) << endl;
-            cout << convert(tmp.usrname) << endl;*/
             if(convert(user_info.email) == convert(tmp.usremail))
             {
                 cout << "\n";
@@ -363,6 +387,10 @@ void login_user(bool &access)
                 if(convert(tmp.usrpassword) == convert(user_info.password))
                 {
                     access = true;
+                    for(int i = 0; i < strlen(user_info.password); i++)
+                    {
+                        user_info.user_name[i] = nowuser[i];
+                    }
                     logs.close();
                 }
             }
@@ -390,7 +418,7 @@ void login_user(bool &access)
 
     exit:
     logs.close();
-    
+
 }
 
 void addcar()
@@ -710,4 +738,79 @@ void updatecar()
             }
         }
     }
+}
+
+void current_time()
+{
+    time_t t= time(NULL);
+    tm* tPtr = localtime(&t);
+    cout << (tPtr->tm_mday) << "/" <<(tPtr->tm_mon)+1 <<"/"<<(tPtr->tm_year)+1900<<endl;
+}
+
+void searchcar()
+{
+    tmpcar car;
+    Car car_list;
+    fstream carfile;
+
+    cout << "\n\t\tEnter car manufacturer: ";
+    cin.ignore();
+    cin.getline(car.tmpmanufacture, 40);
+    cout << "\n\t\tEnter car model: ";
+    cin.getline(car.tmpmodel, 40);
+
+    carfile.open("cars.dat", ios::binary|ios::in);
+
+    if(!carfile.is_open())
+    {
+        cout << "\n\t\tUnable to access the file at the moment...!";
+        exit(1);
+    }
+    else
+    {
+        cout << "\n";
+        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
+        cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |" << endl;
+        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
+        while(carfile.read(reinterpret_cast<char *>(&car_list), sizeof(Car)))
+        {
+            if(convert(car_list.manufacture) == convert(car.tmpmanufacture) && convert(car_list.model) == convert(car.tmpmodel))
+            {
+                cout << "\t\t      " <<car_list.reg_no << setw(15) << car_list.manufacture << setw(25) << car_list.model << setw(15) << car_list.quantity << setw(15) << car_list.price << endl;
+            }
+        }
+        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
+    }
+
+}
+
+void rent()
+{
+    cout << "\n\t\tEnter the RegNo: ";
+}
+
+void rentcar()
+{
+    int input;
+
+    cout << "\t\t------------------------------------"<< endl;
+    cout << setw(32) << "Rent a car" << endl;
+    cout << "\t\t------------------------------------"<< endl;
+    cout << "\n\t\tPress 1 to search for a car and rent it"<<endl;
+    cout << "\n\t\tPress 2 to display the available cars and rent one"<<endl;
+    cout << "\n\t\tEnter your choice -> ";
+    cin >> input;
+
+    switch (input)
+    {
+    case 1:
+        searchcar();
+        break;
+    
+    case 2:
+        showcar();
+        rent();
+        break;
+    }
+
 }
