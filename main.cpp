@@ -14,7 +14,7 @@ struct Car
 {
     char manufacture[40];
     char model[40];
-    int price, quantity, reg_no;
+    int price, quantity, reg_no, available;
 };
 
 struct Customer
@@ -52,7 +52,6 @@ void rentcar();
 void searchcar();
 void rent();
 
-int idx = 0;
 string usrfirstname, usrlastname, usremail;
 string username_admin = "admin", admin_password = "1234";
 int main()
@@ -474,6 +473,7 @@ void addcar()
                     cout << "\n\t\tEnter Quantity: ";
                     cin >> additional;
                     car_info.quantity +=  additional;
+                    car_info.available = car_info.quantity;
                     position = (-1) * static_cast<int> (sizeof(car_info));
                     carfile.seekp(position, ios::cur);
                     carfile.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
@@ -506,6 +506,7 @@ void addcar()
     cin >> car_info.quantity;
     cout << "\n\t\tEnter Price: ";
     cin >> car_info.price;
+    car_info.available = car_info.quantity;
 
     carfile.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
 
@@ -536,15 +537,15 @@ void showcar()
     else
     {
         cout << "\n";
-        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
-        cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |" << endl;
-        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
+        cout <<"\t\t---------------------------------------------------------------------------------------------------" << endl;
+        cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |   Available   |" << endl;
+        cout <<"\t\t---------------------------------------------------------------------------------------------------" << endl;
         while(view_cars.read(reinterpret_cast<char *>(&car_view), sizeof(Car)))
         {
-            cout << "\t\t      " <<car_view.reg_no << setw(15) << car_view.manufacture << setw(25) << car_view.model << setw(15) << car_view.quantity << setw(15) << car_view.price << endl;
+            cout << "\t\t      " <<car_view.reg_no << setw(15) << car_view.manufacture << setw(25) << car_view.model << setw(15) << car_view.quantity << setw(15) << car_view.price << setw(15) << car_view.available<< endl;
 
         }
-        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
+        cout <<"\t\t---------------------------------------------------------------------------------------------------" << endl;
 
     }
 
@@ -553,6 +554,7 @@ void showcar()
     cout << "\n\t\tPress any key to continue... ";
     cin >> user_input;
 }
+
 
 void deletecar()
 {
@@ -769,17 +771,18 @@ void searchcar()
     else
     {
         cout << "\n";
-        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
-        cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |" << endl;
-        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
+        cout <<"\t\t---------------------------------------------------------------------------------------------------" << endl;
+        cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |   Available   |" << endl;
+        cout <<"\t\t---------------------------------------------------------------------------------------------------" << endl;
         while(carfile.read(reinterpret_cast<char *>(&car_list), sizeof(Car)))
         {
             if(convert(car_list.manufacture) == convert(car.tmpmanufacture) && convert(car_list.model) == convert(car.tmpmodel))
             {
-                cout << "\t\t      " <<car_list.reg_no << setw(15) << car_list.manufacture << setw(25) << car_list.model << setw(15) << car_list.quantity << setw(15) << car_list.price << endl;
+                cout << "\t\t      " <<car_list.reg_no << setw(15) << car_list.manufacture << setw(25) << car_list.model << setw(15) << car_list.quantity << setw(15) << car_list.price << setw(15) << car_list.available<<endl;
             }
         }
-        cout <<"\t\t----------------------------------------------------------------------------------" << endl;
+        cout <<"\t\t---------------------------------------------------------------------------------------------------" << endl;
+
     }
 
 }
