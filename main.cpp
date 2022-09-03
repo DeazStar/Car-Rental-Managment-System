@@ -39,6 +39,23 @@ struct tmpcar
     char tmpmodel[40];
 };
 
+struct Rent
+{
+    char usr[50];
+    char car_name[50];
+    char model_name[50];
+    int amount;
+    int rent_day;
+    int day;
+    int month;
+    int year;
+    int new_day;
+    int new_month;
+    int new_year;
+
+
+};
+
 int convert(char *);
 void signup_user();
 void login_user(bool &access);
@@ -47,10 +64,12 @@ void showcar();
 void deletecar();
 void deleteblock(int num);
 void updatecar();
-void current_time();
+int *current_time(int date[], int size);
+int *return_date(int x, int date[], int size);
 void rentcar();
 void searchcar();
 void rent();
+void vochergenerator();
 
 string usrfirstname, usrlastname, usremail;
 string username_admin = "admin", admin_password = "1234";
@@ -386,10 +405,7 @@ void login_user(bool &access)
                 if(convert(tmp.usrpassword) == convert(user_info.password))
                 {
                     access = true;
-                    for(int i = 0; i < strlen(user_info.password); i++)
-                    {
-                        user_info.user_name[i] = nowuser[i];
-                    }
+                    strcpy(nowuser, user_info.user_name);
                     logs.close();
                 }
             }
@@ -742,11 +758,31 @@ void updatecar()
     }
 }
 
-void current_time()
+int *current_time(int date[], int size)
 {
     time_t t= time(NULL);
     tm* tPtr = localtime(&t);
-    cout << (tPtr->tm_mday) << "/" <<(tPtr->tm_mon)+1 <<"/"<<(tPtr->tm_year)+1900<<endl;
+    date[0] = int((tPtr->tm_mday));
+    date[1] = (tPtr->tm_mon)+1;
+    date[2] = (tPtr->tm_year)+1900;
+    return date;
+}
+
+int *return_date(int x, int date[], int size)
+{
+    date[0] = x + date[0];
+    if(date[0] > 30)
+    {
+        date[0] = 1;
+        date[1] = 1 + date[1];
+        if(date[1] > 12)
+        {
+            date[1] = 1;
+            date[2] = 1 + date[2];
+        }
+    }
+
+    return date;
 }
 
 void searchcar()
@@ -789,7 +825,131 @@ void searchcar()
 
 void rent()
 {
+    int no;
+    char input;
+    fstream carfile;
+    Rent rent_info;
+    bool flag = false;
+    Car car_list;
+    int date[3];
+    int rday;
+
+
     cout << "\n\t\tEnter the RegNo: ";
+    cin >> no;
+
+    carfile.open("cars.dat", ios::binary|ios::in);
+
+    if(!carfile.is_open())
+    {
+        cout << "\t\tUnable to access the file at the moment... " << endl;
+        cin >> input;
+    }
+    else
+    {
+        while(carfile.read(reinterpret_cast<char *>(&car_list), sizeof(Car)))
+        {
+            if(no == car_list.reg_no)
+            {
+                flag = true;
+                cout << "\n\n\t\tCar Description" <<endl;
+                cout << "\n\t\tCar Manufacturer: " << car_list.manufacture << endl;
+                cout << "\n\t\tCar Model: " << car_list.model << endl;
+                cout << "\n\t\tPrice : " << car_list.price << endl;
+                break;
+            }
+        }
+    }
+
+    carfile.close();
+
+    if(flag == true)
+    {
+        cout << "\n\t\tDo you want to rent this car(y/n)... ";
+        cin >> input;
+        if(input == 'Y' || input == 'y')
+        {
+            cout << "\n\t\tFor how many days do you want to rent this car: ";
+            cin >> rday;
+            carfile.open("rentedcars.dat", ios::binary|ios::app);
+
+            if(!carfile.is_open())
+            {
+                cout << "\t\tUnable to access the file at the moment... " <<endl;
+                cin >> input;
+            }
+            else
+            {
+                strcpy(rent_info.usr, nowuser);
+                strcpy(rent_info.car_name, car_list.manufacture);
+                strcpy(rent_info.model_name, car_list.model);
+                rent_info.amount = car_list.price;
+                current_time(date, 3);
+                rent_info.day = date[0];
+                rent_info.month = date[1];
+                rent_info.year = date[2];
+                return_date(rday,date, 3);
+                rent_info.rent_day = rday;
+                rent_info.new_day = date[0];
+                rent_info.new_month = date[1];
+                rent_info.new_year = date[2];
+
+                carfile.write(reinterpret_cast<char *>(&rent_info), sizeof(Rent));
+                carfile.close();
+
+                vochergenerator();
+
+            }
+        }
+    }
+
+
+    carfile.close();
+
+    cout << "\n\t\tThank you for using our service. Press anykey to continue... ";
+    cin >> input;
+
+
+    
+}
+
+void vochergenerator()
+{
+    char input;
+    fstream displayfile;
+   
+    Rent rent_info; 
+
+    displayfile.open("rentedcars.dat", ios::binary|ios::in);
+
+    if(!displayfile.is_open())
+    {
+        cout << "\n\t\tcouldn't generate customer invoice .... " << endl;
+    }
+    else
+    {
+        while (displayfile.read(reinterpret_cast<char *>(&rent_info), sizeof(Rent)))
+        {
+            if(convert(rent_info.usr) == convert(nowuser))
+            {
+
+                cout << "\n\t\tCar Rental - Customer Invoice" << endl;
+                cout << "_________________________________________________________________"<< endl;
+                cout << "| Username :--------------------------------- |" << rent_info.usr << endl;
+                cout << "| Manufacturer :----------------------------- |" << rent_info.car_name <<endl;
+                cout << "| Car Model :-------------------------------- |" << rent_info.model_name <<endl;
+                cout << "| Number of days :--------------------------- |" << rent_info.rent_day << endl;
+                cout << "| Your Renta Amout :------------------------- |" << rent_info.amount << endl;
+                cout << "| Rented Date :------------------------------ |" << rent_info.day << "/" << rent_info.month << "/" << rent_info.year << endl;
+                cout << "| Return Date :------------------------------ |" << rent_info.new_day << "/" << rent_info.new_month << "/" << rent_info.new_year << endl;
+                cout << "_________________________________________________________________"<< endl;
+            }
+            
+        }
+        
+    }
+    
+    
 }
 
 void rentcar()
