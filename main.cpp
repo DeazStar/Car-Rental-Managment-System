@@ -70,6 +70,7 @@ void rentcar();
 void searchcar();
 void rent();
 void vochergenerator();
+void history();
 
 string usrfirstname, usrlastname, usremail;
 string username_admin = "admin", admin_password = "1234";
@@ -93,6 +94,8 @@ int main()
     cout << "\t\t\t Enter your choice -> ";
     cin >> user_input;
 
+    cout << "\033[2J\033[1;1H";
+
     if(user_input == 1)
     {
         string username_input, input_password;
@@ -110,6 +113,7 @@ int main()
         if(username_input == username_admin && input_password == admin_password)
         {
             adminmenu:
+            cout << "\033[2J\033[1;1H";
             cout << "\t\t************************************"<< endl;
             cout << setw(40) << "Welcom Admin" << endl;
             cout << "\t\t************************************"<< endl;
@@ -126,19 +130,28 @@ int main()
             switch(user_input)
             {
                 case 1:
+                    cout << "\033[2J\033[1;1H";
                     addcar();
+                    cout << "\033[2J\033[1;1H";
                     goto adminmenu;
                     break;
                 case 2:
+                    cout << "\033[2J\033[1;1H";
                     showcar();
+                    cout << "\033[2J\033[1;1H";
                     goto adminmenu;
+
                     break;
                 case 3:
+                    cout << "\033[2J\033[1;1H";
                     deletecar();
+                    cout << "\033[2J\033[1;1H";
                     goto adminmenu;
                     break;
                 case 4:
+                    cout << "\033[2J\033[1;1H";
                     updatecar();
+                    cout << "\033[2J\033[1;1H";
                     goto adminmenu;
                     break;
                 case 5:
@@ -197,15 +210,15 @@ int main()
 
            if(access == true)
            {
+                usermenu:
                 cout << "\t\t************************************"<< endl;
                 cout << setw(40) << "Welcom to DeadStar Car Rental" << endl;
                 cout << "\t\t************************************"<< endl;
                 cout <<"\t\t-------------------------------------"<<endl;
                 cout <<"\t\t|"<<setw(33)<<"1. Rent Cars               |"<<endl;
-                cout <<"\t\t|"<<setw(33)<<"2. View Cars               |"<<endl;
-                cout <<"\t\t|"<<setw(33)<<"3. Delete Cars             |"<<endl;
-                cout <<"\t\t|"<<setw(33)<<"4. Update Cars             |"<<endl;
-                cout <<"\t\t|"<<setw(33)<<"5. Exit                    |"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"2. View History            |"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"3. Update profile          |"<<endl;
+                cout <<"\t\t|"<<setw(33)<<"4. Exit                    |"<<endl;
                 cout <<"\t\t-------------------------------------"<<endl;
                 cout << "\n\t\tEnter your choice -> ";  
                 cin >> user_input;
@@ -213,7 +226,15 @@ int main()
                 switch(user_input)
                 {
                     case 1:
+                        cout << "\033[2J\033[1;1H";
                         rentcar();
+                        cout << "\033[2J\033[1;1H";
+                        goto usermenu;
+                    case 2:
+                        cout << "\033[2J\033[1;1H";
+                        history();
+                        cout << "\033[2J\033[1;1H";
+                        goto usermenu;
                 }
            }
            else
@@ -480,8 +501,8 @@ void addcar()
         {
             if (no == car_info.reg_no)
             {
-                cout << "\t\tCar aleady exit... " << endl;
-                cout <<"\t\tDo you want to increase the qunatity(y/n).... ";
+                cout << "\n\t\tCar aleady exit... " << endl;
+                cout <<"\n\t\tDo you want to increase the qunatity(y/n).... ";
                 cin >> user_input;
                 char yes[2] = "y";
                 if(strcasecmp(user_input, yes) == 0)
@@ -493,6 +514,7 @@ void addcar()
                     position = (-1) * static_cast<int> (sizeof(car_info));
                     carfile.seekp(position, ios::cur);
                     carfile.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                    goto end;
                 }
                 else
                 {
@@ -693,7 +715,7 @@ void updatecar()
                 cout << "\t\t  5. Price " << endl;
                 cout << "\t\t  6. all " << endl;
 
-                cout << "\n\t\t Enter your choice:-> " << endl;
+                cout << "\n\t\t Enter your choice:-> ";
                 cin >> input;
 
                 switch(input)
@@ -789,7 +811,11 @@ void searchcar()
 {
     tmpcar car;
     Car car_list;
+    Rent rent_info;
     fstream carfile;
+    char input;
+    int date[3];
+    int rday;
 
     cout << "\n\t\tEnter car manufacturer: ";
     cin.ignore();
@@ -821,6 +847,49 @@ void searchcar()
 
     }
 
+    carfile.close();
+    cout << "\n\t\t Do you want to trent this car(y/n)... ";
+    cin >> input;
+
+    if(input == 'Y' || input =='y')
+    {
+        cout << "\n\t\tFor how many days do you want to rent this car: ";
+        cin >> rday;
+        carfile.open("rentedcars.dat", ios::binary|ios::app);
+
+        if(!carfile.is_open())
+        {
+            cout << "\n\t\tUnable to access the file at the momnet... " << endl;
+            cin >> input;
+        }
+        else
+        {
+            strcpy(rent_info.usr, nowuser);
+            strcpy(rent_info.car_name, car_list.manufacture);
+            strcpy(rent_info.model_name, car_list.model);
+            rent_info.amount = car_list.price;
+            current_time(date, 3);
+            rent_info.day = date[0];
+            rent_info.month = date[1];
+            rent_info.year = date[2];
+            return_date(rday,date, 3);
+            rent_info.rent_day = rday;
+            rent_info.new_day = date[0];
+            rent_info.new_month = date[1];
+            rent_info.new_year = date[2];
+
+            carfile.write(reinterpret_cast<char *>(&rent_info), sizeof(Rent));
+            carfile.close();
+
+                vochergenerator();
+        }
+    }
+
+    carfile.close();
+
+    cout << "\n\t\tThank you for using our service. Press anykey to continue... ";
+    cin >> input;
+
 }
 
 void rent()
@@ -828,6 +897,7 @@ void rent()
     int no;
     char input;
     fstream carfile;
+    fstream tempfile;
     Rent rent_info;
     bool flag = false;
     Car car_list;
@@ -895,7 +965,20 @@ void rent()
                 rent_info.new_year = date[2];
 
                 carfile.write(reinterpret_cast<char *>(&rent_info), sizeof(Rent));
+
+                tempfile.open("temporaryfile.dat", ios::binary|ios::out);
+
+                if(!tempfile.is_open())
+                {
+                    //some code
+                    exit(1);
+                }
+                else
+                {
+                    tempfile.write(reinterpret_cast<char *>(&rent_info), sizeof(Rent));
+                }
                 carfile.close();
+                tempfile.close();
 
                 vochergenerator();
 
@@ -920,11 +1003,12 @@ void vochergenerator()
    
     Rent rent_info; 
 
-    displayfile.open("rentedcars.dat", ios::binary|ios::in);
+    displayfile.open("temporaryfile.dat", ios::binary|ios::in);
 
     if(!displayfile.is_open())
     {
         cout << "\n\t\tcouldn't generate customer invoice .... " << endl;
+        exit(1);
     }
     else
     {
@@ -932,7 +1016,7 @@ void vochergenerator()
         {
             if(convert(rent_info.usr) == convert(nowuser))
             {
-
+                cout << "_________________________________________________________________"<< endl;
                 cout << "\n\t\tCar Rental - Customer Invoice" << endl;
                 cout << "_________________________________________________________________"<< endl;
                 cout << "| Username :--------------------------------- |" << rent_info.usr << endl;
@@ -943,11 +1027,15 @@ void vochergenerator()
                 cout << "| Rented Date :------------------------------ |" << rent_info.day << "/" << rent_info.month << "/" << rent_info.year << endl;
                 cout << "| Return Date :------------------------------ |" << rent_info.new_day << "/" << rent_info.new_month << "/" << rent_info.new_year << endl;
                 cout << "_________________________________________________________________"<< endl;
+
+                break;
             }
             
         }
         
     }
+    
+    remove("temporaryfile.dat");
     
     
 }
@@ -955,12 +1043,13 @@ void vochergenerator()
 void rentcar()
 {
     int input;
-
+    retry:
     cout << "\t\t------------------------------------"<< endl;
     cout << setw(32) << "Rent a car" << endl;
     cout << "\t\t------------------------------------"<< endl;
     cout << "\n\t\tPress 1 to search for a car and rent it"<<endl;
     cout << "\n\t\tPress 2 to display the available cars and rent one"<<endl;
+    cout << "\n\t\tPress 3 to go back to the menu" << endl;
     cout << "\n\t\tEnter your choice -> ";
     cin >> input;
 
@@ -974,6 +1063,81 @@ void rentcar()
         showcar();
         rent();
         break;
+    case 3:
+        goto end;
+    default:
+        cout << "\n\t\tEnter the correct input... "<<endl;
+        cout << "\n\t\tPress 1 to retry. Press any other key to goback to the menu... ";
+        cin >> input;
+        if(input == 1)
+        {
+            cout << "\033[2J\033[1;1H";
+            goto retry;
+
+        }
+        break;
+
     }
 
+    end:
+    cout << "\n";
+
+}
+
+void history()
+{
+    char input;
+
+    fstream historyfile;
+
+    bool flag = true;
+
+    Rent rent_info;
+
+    cout << "\t\t------------------------------------"<< endl;
+    cout << setw(32) << "History" << endl;
+    cout << "\t\t------------------------------------"<< endl;
+    cout << "\n\n";
+
+    historyfile.open("rentedcars.dat", ios::binary|ios::in);
+
+    if(!historyfile.is_open())
+    {
+        cout << "\n\t\tcouldn't generate history .... "<<endl;
+        exit(1);
+    }
+
+    else
+    {
+        while (historyfile.read(reinterpret_cast<char *>(&rent_info), sizeof(Rent)))
+        {
+            if(convert(rent_info.usr) == convert(nowuser))
+            {
+                flag = false;
+                cout << "_________________________________________________________________"<< endl;
+                cout << "\n\t\tCar Rental - Customer Invoice" << endl;
+                cout << "_________________________________________________________________"<< endl;
+                cout << "| Username :--------------------------------- |" << rent_info.usr << endl;
+                cout << "| Manufacturer :----------------------------- |" << rent_info.car_name <<endl;
+                cout << "| Car Model :-------------------------------- |" << rent_info.model_name <<endl;
+                cout << "| Number of days :--------------------------- |" << rent_info.rent_day << endl;
+                cout << "| Your Renta Amout :------------------------- |" << rent_info.amount << endl;
+                cout << "| Rented Date :------------------------------ |" << rent_info.day << "/" << rent_info.month << "/" << rent_info.year << endl;
+                cout << "| Return Date :------------------------------ |" << rent_info.new_day << "/" << rent_info.new_month << "/" << rent_info.new_year << endl;
+                cout << "_________________________________________________________________"<< endl;                
+            }
+        }
+    }
+
+    if(flag == true)
+    {
+        cout << "\n\t\tyou have no history!" << endl;
+    }
+
+    cout << "\n\t\tPress any key to continue... ";
+
+    cin >> input;
+
+    
+    
 }
