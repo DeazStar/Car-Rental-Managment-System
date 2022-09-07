@@ -71,6 +71,7 @@ void searchcar();
 void rent();
 void vochergenerator();
 void history();
+void editprofile();
 
 string usrfirstname, usrlastname, usremail;
 string username_admin = "admin", admin_password = "1234";
@@ -1138,6 +1139,32 @@ void history()
 
     cin >> input;
 
-    
-    
 }
+/*
+void editprofile()
+{
+    fstream editfile;
+
+    Customer user_now;
+
+    cout << "\n\t\tEdit your profile" << endl;
+
+    editfile.open("logsfile.dat",ios::binary|ios::in|ios::out);
+
+    if(!editfile.is_open())
+    {
+        cout << "\n\t\tCouldn't access the logs file at the moment.... ";
+        exit(1);
+    }
+    else
+    {
+        while(editfile.read(reinterpret_cast<char *>(&user_now), sizeof(Customer)))
+        {
+            if(nowuser == user_now.user_name)
+            {
+
+            }
+        }
+    }
+
+}*/
