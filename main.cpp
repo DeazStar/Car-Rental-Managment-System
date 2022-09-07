@@ -57,6 +57,7 @@ struct Rent
 };
 
 int convert(char *);
+int convertcase(char *);
 void signup_user();
 void login_user(bool &access);
 void addcar();
@@ -267,6 +268,28 @@ int convert(char *str)
     return sum;
 }
 
+int convertcase(char *s)
+{
+    int sum = 0;
+    for(int i = 0; s[i] != '\0'; i++)
+    {
+        if(s[i] >= 'a' && s[i] <= 'z')
+        {
+          s[i] -= 32;  
+          sum += int(s[i]);
+        }
+        else
+        {
+            sum += int(s[i]);
+        }
+
+    }
+
+    return sum;
+
+
+}
+
 void signup_user()
 {
     Customer user_info;
@@ -422,7 +445,7 @@ void login_user(bool &access)
     {
         while(logs.read(reinterpret_cast<char *>(&user_info), sizeof(Customer)))
         {
-            if(convert(tmp.usrname) == convert(user_info.user_name))
+            if(convertcase(tmp.usrname) ==  convertcase(user_info.user_name))
             {
                 if(convert(tmp.usrpassword) == convert(user_info.password))
                 {
@@ -571,6 +594,8 @@ void showcar()
  if(!view_cars.is_open())
     {
         cout << "\n\t\tUnable to access the file at the moment...!";
+        cout << "\n\t\tpress any key to continue.... ";
+        cin >> user_input;
         exit(1);
     }
     else
@@ -597,7 +622,7 @@ void showcar()
 
 void deletecar()
 {
-    int no, decrement, position;
+    int no, decrement, position, x = 405, y=288;
     char user_input[20];
     fstream car_delete;
     Car car_info;
@@ -613,6 +638,7 @@ void deletecar()
     if(car_delete.is_open() == false)
     {
         cout << "\t\tUnable to access the file at the moment... "<<endl;
+        cout << "\n\t\tPress any key to continue...";
         cin >> user_input;
     }
     else
@@ -623,7 +649,32 @@ void deletecar()
             {
                 cout << "\n\t\tEnter Quantity: ";
                 cin >> decrement;
+                try
+                {
+                    if(decrement < 0)
+                    {
+                        throw y;
+                    }
+                }
+                catch(int x)
+                {
+                    cout << "\n\t\ttrying to add negative quantity ERROR NUMBER: "<< y << endl;
+                    exit(1);
+                }
+                
                 car_info.quantity -= decrement;
+                try
+                { 
+                    if(car_info.quantity < 0)
+                    {
+                        throw x;
+                    }  
+                }catch(int x)
+                {
+                    cout << "\n\t\tQuantity can not be negative ERROR NUMBER: " << x << endl;
+                    exit(1);
+                }
+               
                 if(car_info.quantity == 0)
                 {
                     deleteblock(car_info.reg_no);
@@ -683,11 +734,15 @@ void updatecar()
 
     char user_input[20];
 
-    int input;
+    char input;
 
     int position;
 
+    bool flag = false;
+
     fstream car_update;
+
+    retry:
 
     cout << "\t\t------------------------------------"<< endl;
     cout << setw(32) << "Update Cars" << endl;
@@ -708,6 +763,7 @@ void updatecar()
         {
             if(no == car_info.reg_no)
             {
+                flag = true;
                 cout <<"\n\t\tWhat do you want to edit:- " << endl;
                 cout << "\n\t\t  1. RegNo"<<endl;
                 cout << "\t\t  2. Manufacturer Name " << endl;
@@ -777,6 +833,21 @@ void updatecar()
 
                 }
             }
+        }
+        
+    }
+
+    car_update.close();
+    if(flag == false)
+    {
+        cout << "\n\t\tCar doesn't exist" <<endl;
+        cout << "\n\t\tPress 1 to try again. Press any other key to go to the menu.... ";
+        cin >> input;
+
+        if(input == '1')
+        {
+            cout << "\033[2J\033[1;1H";
+            goto retry;
         }
     }
 }
