@@ -984,7 +984,7 @@ void searchcar()
     {
         cout << "\n";
         cout << "\t\t---------------------------------------------------------------------------------------------------" << endl;
-        cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |   Available   |" << endl;
+        cout << "\t\t   RegNo  |    Car Name      |       Model       |     quantity   |   Price   |   Available   |" << endl;
         cout << "\t\t---------------------------------------------------------------------------------------------------" << endl;
         while (carfile.read(reinterpret_cast<char *>(&car_list), sizeof(Car)))
         {
