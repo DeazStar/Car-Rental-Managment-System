@@ -301,7 +301,10 @@ void signup_user()
     int length;
 
     int input;
-    signups.open("logsfile.dat", ios::binary|ios::in|ios::out);
+
+    bool flag = false;
+
+    signups.open("logsfile.dat", ios::binary|ios::in);
     
     cout <<'\n';
     cout << "\t\t************************************"<< endl;
@@ -324,32 +327,21 @@ void signup_user()
     cin >>  tmp.usrname;
     cout << "\n";
     cout <<"\t\tEnter password: ";
-    cin >> user_info.password;
+    cin >> tmp.usrpassword;
 
     
-
-    signups.seekg(0, ios::end);
-    length = signups.tellg();
-
-    if(length == -1 || length == 0)
-    {
-        signups.close();
-        goto finish;
-    }
-    else
-    {
-        signups.seekg(ios::beg);
-    }
     if(signups.is_open() == false)
     {
         cout << "\t\t Unable to access the file at the moment please try again later! " << endl;
     }
     else
     {
-        while(signups.read(reinterpret_cast<char *>(&user_info), sizeof(Customer)))
+        while(!signups.eof())
         {
+            signups.read(reinterpret_cast<char *> (&user_info), sizeof(Customer));
             if(convert(user_info.email) == convert(tmp.usremail))
             {
+                flag = true;
                 cout << "\n";
                 cout << "\t\tThis email is already registered\n"<<endl;
                 cout << "\t\tPress 1 to try again. press any other key to go back... ";
@@ -367,6 +359,7 @@ void signup_user()
             }
             else if(convert(user_info.user_name)== convert(tmp.usrname))
             {
+                flag = true;
                 cout << "\n";
                 cout << "\t\tThis username is already taken!\n"<<endl;
                 cout << "\t\tPress 1 to try again. press any other key to go back... ";
@@ -381,29 +374,39 @@ void signup_user()
                     goto exit;
                 }
             }
-            else
-            {   signups.close();
-                goto finish;
-            }
         }
     }
 
+    signups.close();
+
+    if(flag == false)
+    {
+        strcpy(user_info.user_name, tmp.usrname);
+        strcpy(user_info.email, tmp.usremail);
+        strcpy(user_info.password, tmp.usrpassword);
+
+        signups.open("logsfile.dat", ios::binary|ios::app);
+
+        if(!signups.is_open())
+        {
+            cout << "\n\t\tcant access the file... " <<endl;
+            cout << "\n\t\tPress any key to continue ... ";
+            cin >> input;
+            exit(1);
+        }
+
+        else
+        {
+            signups.write(reinterpret_cast<char *>(&user_info), sizeof(Customer));
+        }
+
+
+    }
+
+    exit:
+    signups.close();
     
 
-    finish:
-
-    signups.open("logsfile.dat", ios::binary|ios::app);
-    for(int i = 0; i < strlen(tmp.usrname); i++)
-    {
-        user_info.user_name[i] = tmp.usrname[i];
-    }
-    for(int i = 0; i < strlen(tmp.usremail); i++)
-    {
-        user_info.email[i] = tmp.usremail[i];
-    }
-    signups.write(reinterpret_cast<char *>(&user_info), sizeof(Customer));
-    exit:
-    signups.close();  
 
 }
 
