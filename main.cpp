@@ -132,32 +132,32 @@ again:
 
             switch (user_input)
             {
-            case 1:
+            case '1':
                 cout << "\033[2J\033[1;1H";
                 addcar();
                 cout << "\033[2J\033[1;1H";
                 goto adminmenu;
                 break;
-            case 2:
+            case '2':
                 cout << "\033[2J\033[1;1H";
                 showcar();
                 cout << "\033[2J\033[1;1H";
                 goto adminmenu;
 
                 break;
-            case 3:
+            case '3':
                 cout << "\033[2J\033[1;1H";
                 deletecar();
                 cout << "\033[2J\033[1;1H";
                 goto adminmenu;
                 break;
-            case 4:
+            case '4':
                 cout << "\033[2J\033[1;1H";
                 updatecar();
                 cout << "\033[2J\033[1;1H";
                 goto adminmenu;
                 break;
-            case 5:
+            case '5':
             askagain:
                 cout << "\n\t\tAre you sure you want to exit the program(y/n)... ";
                 cin >> input;
@@ -194,7 +194,10 @@ again:
         }
     }
 
-    if (user_input != '2' || user_input != '1')
+    if (user_input == '2')
+    {
+    }
+    else
     {
         cout << "\n\t\tPlease Enter the correct input...";
 
@@ -226,7 +229,8 @@ manu:
 
     switch (user_input)
     {
-    case 1:
+    case '1':
+         cout << "\033[2J\033[1;1H";
         login_user(access);
 
         if (access == true)
@@ -261,14 +265,29 @@ manu:
         }
         else
         {
+            cout << "\033[2J\033[1;1H";
             goto manu;
         }
         break;
-    case 2:
+    case '2':
         signup_user();
         break;
     default:
         cout << "\t\tPlease Enter the correct input... " << endl;
+
+        cout << "\n\n\tPress 1 to retry. Press any otehr key to exit... ";
+
+        cin >>user_input;
+
+        if (user_input == '1')
+        {
+            cout << "\033[2J\033[1;1H";
+            goto manu;
+        }
+        else
+        {
+            exit(1);
+        }
     }
 
     return 0;
@@ -481,6 +500,7 @@ retry:
 
         if (input == 1)
         {
+             cout << "\033[2J\033[1;1H";
             goto retry;
         }
         else
