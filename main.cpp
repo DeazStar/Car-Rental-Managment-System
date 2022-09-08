@@ -243,24 +243,44 @@ manu:
             cout << "\t\t-------------------------------------" << endl;
             cout << "\t\t|" << setw(33) << "1. Rent Cars               |" << endl;
             cout << "\t\t|" << setw(33) << "2. View History            |" << endl;
-            cout << "\t\t|" << setw(33) << "3. Update profile          |" << endl;
-            cout << "\t\t|" << setw(33) << "4. Exit                    |" << endl;
+            cout << "\t\t|" << setw(33) << "3. Exit                    |" << endl;
             cout << "\t\t-------------------------------------" << endl;
             cout << "\n\t\tEnter your choice -> ";
             cin >> user_input;
 
             switch (user_input)
             {
-            case 1:
+            case '1':
                 cout << "\033[2J\033[1;1H";
                 rentcar();
                 cout << "\033[2J\033[1;1H";
                 goto usermenu;
-            case 2:
+                break;
+            case '2':
                 cout << "\033[2J\033[1;1H";
                 history();
                 cout << "\033[2J\033[1;1H";
                 goto usermenu;
+                break;
+            case '3':
+                ask:
+                cout << "\n\t\tAre you sure you want to exit the program(y/n)... ";
+                cin >> input;
+                if (input == 'Y' || input == 'y')
+                {
+                    exit(1);
+                }
+                else if (input == 'N' || input == 'n')
+                {
+                    cout << "\033[2J\033[1;1H";
+                    goto usermenu;
+                }
+                else
+                {
+                    cout << "\n\t\tEnter the correct input... " << endl;
+                    goto ask;
+                }
+
             }
         }
         else
@@ -591,7 +611,7 @@ addinfo:
 
     car_info.reg_no = no;
     cin.ignore();
-    cout << "\n\t\tEnter Manufacturer: ";
+    cout << "\n\t\tEnter Car Name: ";
     cin.getline(car_info.manufacture, 40);
     cout << "\n\t\tEnter Mode: ";
     cin.getline(car_info.model, 40);
@@ -632,7 +652,7 @@ void showcar()
     {
         cout << "\n";
         cout << "\t\t---------------------------------------------------------------------------------------------------" << endl;
-        cout << "\t\t   RegNo  |    Manufacture      |       Model       |     quantity   |   Price   |   Available   |" << endl;
+        cout << "\t\t   RegNo  |        Car Name        |       Model       |     quantity   |   Price   |   Available   |" << endl;
         cout << "\t\t---------------------------------------------------------------------------------------------------" << endl;
         while (view_cars.read(reinterpret_cast<char *>(&car_view), sizeof(Car)))
         {
@@ -649,11 +669,13 @@ void showcar()
 
 void deletecar()
 {
+    bool flag = false;
     int no, decrement, position, x = 405, y = 288;
-    char user_input[20];
+    char user_input;
     fstream car_delete;
     Car car_info;
 
+    retry:
     cout << "\t\t------------------------------------" << endl;
     cout << setw(32) << "Delete Cars" << endl;
     cout << "\t\t------------------------------------" << endl;
@@ -674,6 +696,7 @@ void deletecar()
         {
             if (no == car_info.reg_no)
             {
+                flag = true;
                 cout << "\n\t\tEnter Quantity: ";
                 cin >> decrement;
                 try
@@ -714,6 +737,21 @@ void deletecar()
                     car_delete.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
                 }
             }
+        }
+    }
+
+    car_delete.close();
+
+    if(flag == false)
+    {
+        cout << "\n\t\tCar with this RegNo doesn't exsist... ";
+        cout << "\n\n\t\tPress 1 to retry. Press 2 to go back to the menu.... ";
+        cin >> user_input;
+
+        if(user_input == '1')
+        {
+            cout << "\033[2J\033[1;1H";
+            goto retry;
         }
     }
 }
