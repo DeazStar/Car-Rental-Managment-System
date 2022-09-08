@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <stdbool.h>
 #include <ctime>
+#include <string>
+#include <typeinfo>
 
 using namespace std;
 
@@ -182,7 +184,7 @@ again:
             cout << "\n\t\tPress 1 to retry, Press any key to exit... ";
             cin >> user_input;
 
-            if (user_input == 1)
+            if (user_input == '1')
             {
                 cout << "\033[2J\033[1;1H";
                 goto retry;
@@ -291,6 +293,7 @@ manu:
         break;
     case '2':
         signup_user();
+        goto again;
         break;
     default:
         cout << "\t\tPlease Enter the correct input... " << endl;
@@ -377,7 +380,7 @@ retry:
     cin >> tmp.usremail;
     cout << "\n";
 usrretry:
-    cout << "\t\tEnter user name: ";
+    cout << "\t\tEnter username: ";
     cin >> tmp.usrname;
     cout << "\n";
     cout << "\t\tEnter password: ";
@@ -543,6 +546,8 @@ void addcar()
 
     int no, length;
 
+    int z;
+
     int additional, position;
     cout << "\t\t------------------------------------" << endl;
     cout << setw(32) << "Add Cars" << endl;
@@ -626,8 +631,7 @@ addinfo:
     carfile.close();
 
 end:
-    cout << "\n"
-         << endl;
+    cout << "\n"<< endl;
 }
 
 void showcar()
@@ -652,7 +656,7 @@ void showcar()
     {
         cout << "\n";
         cout << "\t\t---------------------------------------------------------------------------------------------------" << endl;
-        cout << "\t\t   RegNo  |        Car Name        |       Model       |     quantity   |   Price   |   Available   |" << endl;
+        cout << "\t\t   RegNo  |      Car Name        |       Model       |     quantity   |   Price   |   Available   |" << endl;
         cout << "\t\t---------------------------------------------------------------------------------------------------" << endl;
         while (view_cars.read(reinterpret_cast<char *>(&car_view), sizeof(Car)))
         {
@@ -713,6 +717,12 @@ void deletecar()
                 }
 
                 car_info.quantity -= decrement;
+                car_info.available -= decrement;
+
+                if(car_info.available < 0)
+                {
+                    car_info.available = 0;
+                }
                 try
                 {
                     if (car_info.quantity < 0)
@@ -840,45 +850,45 @@ retry:
 
                 switch (input)
                 {
-                case 1:
+                case '1':
                     cout << "\n\t\t Enter the new RegNo: ";
                     cin >> car_info.reg_no;
                     position = (-1) * static_cast<int>(sizeof(car_info));
                     car_update.seekp(position, ios::cur);
                     car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
                     break;
-                case 2:
+                case '2':
                     cout << "\n\t\t Enter the the new Manufacturer Name: ";
                     cin >> car_info.manufacture;
                     position = (-1) * static_cast<int>(sizeof(car_info));
                     car_update.seekp(position, ios::cur);
                     car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
                     break;
-                case 3:
+                case '3':
                     cout << "\n\t\t Enter the new Model: ";
                     cin >> car_info.model;
                     position = (-1) * static_cast<int>(sizeof(car_info));
                     car_update.seekp(position, ios::cur);
                     car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
                     break;
-                case 4:
+                case '4':
                     cout << "\n\t\t Enter the new Quantity: ";
                     cin >> car_info.quantity;
                     position = (-1) * static_cast<int>(sizeof(car_info));
                     car_update.seekp(position, ios::cur);
                     car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
                     break;
-                case 5:
+                case '5':
                     cout << "\n\t\t Enter the new Price: ";
                     cin >> car_info.price;
                     position = (-1) * static_cast<int>(sizeof(car_info));
                     car_update.seekp(position, ios::cur);
                     car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
                     break;
-                case 6:
+                case '6':
                     cout << "\n\t\t Enter the new RegNo: ";
                     cin >> car_info.reg_no;
-                    cout << "\n\t\t Enter the the new Manufacturer Name: ";
+                    cout << "\n\t\t Enter the the new Car Name: ";
                     cin >> car_info.manufacture;
                     cout << "\n\t\t Enter the new Model: ";
                     cin >> car_info.model;
@@ -889,9 +899,17 @@ retry:
                     position = (-1) * static_cast<int>(sizeof(car_info));
                     car_update.seekp(position, ios::cur);
                     car_update.write(reinterpret_cast<char *>(&car_info), sizeof(Car));
+                    break;
                 default:
                     cout << "\n\t\t Enter the correct input... ";
-                    exit(1); // to be edited;
+                    cout << "\n\n\t\t Press 1 to try again. press any other key to go back to the menu.... ";
+                    cin >> input;
+
+                    if(input == '1')
+                    {
+                        cout << "\033[2J\033[1;1H";
+                        goto retry;
+                    }
                 }
             }
         }
@@ -1037,7 +1055,7 @@ void rent()
     cout << "\n\t\tEnter the RegNo: ";
     cin >> no;
 
-    carfile.open("cars.dat", ios::binary | ios::in);
+    carfile.open("cars.dat", ios::binary | ios::in | ios::out);
 
     if (!carfile.is_open())
     {
@@ -1052,7 +1070,7 @@ void rent()
             {
                 flag = true;
                 cout << "\n\n\t\tCar Description" << endl;
-                cout << "\n\t\tCar Manufacturer: " << car_list.manufacture << endl;
+                cout << "\n\t\tCar Name: " << car_list.manufacture << endl;
                 cout << "\n\t\tCar Model: " << car_list.model << endl;
                 cout << "\n\t\tPrice : " << car_list.price << endl;
                 break;
@@ -1079,6 +1097,7 @@ void rent()
             }
             else
             {
+                car_list.available--;
                 strcpy(rent_info.usr, nowuser);
                 strcpy(rent_info.car_name, car_list.manufacture);
                 strcpy(rent_info.model_name, car_list.model);
